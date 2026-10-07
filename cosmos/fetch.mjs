@@ -18,7 +18,7 @@ export async function gql(query, variables, fetchImpl = fetch) {
 }
 
 const Q_MAIN = `query($login:String!){ user(login:$login){
-  createdAt avatarUrl(size:96) followers{ totalCount }
+  createdAt avatarUrl(size:64) followers{ totalCount }
   repositoriesContributedTo(first:1, contributionTypes:[COMMIT,PULL_REQUEST,ISSUE,REPOSITORY]){ totalCount }
   contributionsCollection{
     totalCommitContributions totalPullRequestContributions totalIssueContributions

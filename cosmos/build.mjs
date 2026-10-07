@@ -13,6 +13,7 @@ import { fmtInt } from './kit.mjs';
 import { signals, signalButton } from './art-signals.mjs';
 import { header, combo, footer } from './art-misc.mjs';
 import { galaxySTL } from './stl.mjs';
+import { starchart } from './art-starchart.mjs';
 
 const DIR = dirname(fileURLToPath(import.meta.url));
 const read = (f) => readFileSync(join(DIR, f));
@@ -80,6 +81,7 @@ const jobs = {
   combo: () => combo({ fonts }),
   'footer-dark': () => footer({ fonts, bg: read('nebula-footer.jpg'), theme: 'dark', d }),
   'footer-light': () => footer({ fonts, bg: null, theme: 'light', d }),
+  starchart: () => starchart({ fonts, d }),
   galaxy: () => galaxy({ fonts, bg: read('nebula-galaxy.jpg'), spiral: read('spiral.jpg'), d }),
 };
 
