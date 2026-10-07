@@ -13111,7 +13111,7 @@ endsolid scg-commit-galaxy
 </picture>
 
 <!-- SYNC:START -->
-<sub>🛰️ telemetry synced <b>2026-10-07</b> · this profile rebuilds itself every day from <a href="cosmos">/cosmos</a> · zero dependencies · <a href="#top">back to launch ↑</a></sub>
+<sub>🛰️ live data last changed <b>10/07 07:04 UTC</b> · checked every 15 minutes by <a href="cosmos">/cosmos</a> · 0 votes on the ballot · <a href="#top">back to top ↑</a></sub>
 <!-- SYNC:END -->
 
 </div>
