@@ -1,9 +1,10 @@
-# Rebuilds the profile from live GitHub telemetry. Zero dependencies: just Node + the files in /cosmos.
-name: cosmos · telemetry sync
+# Keeps every number on the profile live: pulls X, OpenRouter and GitHub data, re-renders, ships.
+# Zero dependencies: just Node + the files in /cosmos. Commits only when something visible changed.
+name: cosmos · live sync
 
 on:
   schedule:
-    - cron: "23 5 * * *"      # daily
+    - cron: "*/15 * * * *"    # every 15 minutes (GitHub's practical floor for a live profile)
   workflow_dispatch:
   push:
     branches: [main]
@@ -12,12 +13,17 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: cosmos-live-sync
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
-      - name: Fetch telemetry
+      - name: Fetch live data
         run: node --version && node cosmos/fetch.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -30,8 +36,8 @@ jobs:
           for attempt in 1 2 3 4 5; do
             node cosmos/build.mjs
             git add -A cosmos README.md
-            if git diff --cached --quiet; then echo "nothing changed"; exit 0; fi
-            git commit -q -m "🛰️ telemetry sync $(date -u +%F)"
+            if git diff --cached --quiet; then echo "nothing visible changed"; exit 0; fi
+            git commit -q -m "📡 live sync $(date -u '+%F %H:%M') UTC"
             if git push -q origin HEAD:main; then exit 0; fi
             echo "push raced, retrying ($attempt)"; sleep $((RANDOM % 8 + 3))
             git fetch -q origin main && git reset -q --hard origin/main

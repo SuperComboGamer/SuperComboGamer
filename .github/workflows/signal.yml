@@ -1,4 +1,6 @@
-# Guestbook: anyone who opens a "📡 signal" issue becomes a star in the profile's sky.
+# Two interactive features, both driven by issues:
+#   "📡 signal"      the visitor becomes a star in the guestbook sky
+#   "vote: <model>"  the visitor's vote for the next NYC skyline test is counted (one per account)
 name: cosmos · incoming signal
 
 on:
@@ -11,11 +13,12 @@ permissions:
 
 jobs:
   plant:
-    if: contains(github.event.issue.title, 'signal') && github.event.issue.user.type == 'User'
+    if: (contains(github.event.issue.title, 'signal') || startsWith(github.event.issue.title, 'vote:')) && github.event.issue.user.type == 'User'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
-      - name: Plant the star, render, ship
+      - name: Record it, render, ship
         id: plant
         env:
           SIGNAL_LOGIN: ${{ github.event.issue.user.login }}
@@ -24,13 +27,14 @@ jobs:
         run: |
           git config user.name "scg-cosmos[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [[ "$SIGNAL_TITLE" =~ ^[[:space:]]*[Vv][Oo][Tt][Ee]: ]]; then KIND="🗳️ vote"; else KIND="📡 signal"; fi
           for attempt in 1 2 3 4 5 6; do
             node cosmos/signal.mjs
             if grep -q '^result=skip' "$GITHUB_OUTPUT"; then exit 0; fi
             node cosmos/build.mjs
             git add -A cosmos README.md
             if git diff --cached --quiet; then exit 0; fi
-            git commit -q -m "📡 signal from @${SIGNAL_LOGIN}"
+            git commit -q -m "$KIND from @${SIGNAL_LOGIN}"
             if git push -q origin HEAD:main; then exit 0; fi
             echo "push raced, retrying ($attempt)"; sleep $((RANDOM % 8 + 3))
             git fetch -q origin main && git reset -q --hard origin/main
