@@ -1,5 +1,5 @@
 // build.mjs — renders every SVG in /cosmos from stats.json + signals.json. Zero dependencies.
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { prepFonts } from './kit.mjs';
@@ -12,7 +12,7 @@ import { missionPatch, sceneF1, scenePulse, sceneNight, sceneControl } from './a
 import { fmtInt } from './kit.mjs';
 import { signals, signalButton } from './art-signals.mjs';
 import { header, combo, footer } from './art-misc.mjs';
-import { skylineSTL } from './stl.mjs';
+import { galaxySTL } from './stl.mjs';
 
 const DIR = dirname(fileURLToPath(import.meta.url));
 const read = (f) => readFileSync(join(DIR, f));
@@ -90,10 +90,13 @@ for (const [name, fn] of Object.entries(jobs)) {
   console.log(`${name}.svg`, (Buffer.byteLength(svg) / 1024).toFixed(1) + ' KB');
 }
 
+// legacy outputs from earlier versions of the engine
+for (const old of ['skyline.stl']) if (existsSync(join(DIR, old))) rmSync(join(DIR, old));
+
 // ---- README live sections ----
 if (!only || only === 'readme') {
-  const stl = skylineSTL(d.cal, { name: 'scg-last-365-days' });
-  writeFileSync(join(DIR, 'skyline.stl'), stl + '\n');
+  const stl = galaxySTL(d.cal);
+  writeFileSync(join(DIR, 'galaxy.stl'), stl + '\n');
   const readmePath = join(DIR, '..', 'README.md');
   let md = readFileSync(readmePath, 'utf8');
   const put = (key, content) => {
@@ -102,13 +105,13 @@ if (!only || only === 'readme') {
   };
   put('HOLOGRAM', [
     '<details>',
-    `<summary><b>🛰️ HOLOGRAM</b> — grab it, spin it: my last 365 days as a 3D skyline (${fmtInt(d.rolling)} contributions)</summary>`,
+    `<summary><b>🛰️ HOLOGRAM</b> — grab it, spin it: the commit galaxy in 3D (${fmtInt(d.rolling)} contributions)</summary>`,
     '',
     '```stl',
     stl,
     '```',
     '',
-    '<sub>one tower per day · height = contributions · <a href="cosmos/skyline.stl">open full screen</a></sub>',
+    '<sub>one tower per active day, on the same spiral arms as the galaxy above · height = contributions · drag to orbit · <a href="cosmos/galaxy.stl">open full screen</a></sub>',
     '</details>',
   ].join('\n'));
   const latest = sigList.slice(-12).reverse();
@@ -117,5 +120,5 @@ if (!only || only === 'readme') {
     : '<sub>📡 no signals yet. the first star in this sky could be yours.</sub>');
   put('SYNC', `<sub>🛰️ telemetry synced <b>${d.today}</b> · this profile rebuilds itself every day from <a href="cosmos">/cosmos</a> · zero dependencies · <a href="#top">back to launch ↑</a></sub>`);
   writeFileSync(readmePath, md);
-  console.log('README.md', (Buffer.byteLength(md) / 1024).toFixed(1) + ' KB', '· skyline.stl', (stl.length / 1024).toFixed(1) + ' KB');
+  console.log('README.md', (Buffer.byteLength(md) / 1024).toFixed(1) + ' KB', '· galaxy.stl', (stl.length / 1024).toFixed(1) + ' KB');
 }
