@@ -1,0 +1,41 @@
+# Rebuilds the profile from live GitHub telemetry. Zero dependencies: just Node + the files in /cosmos.
+name: cosmos · telemetry sync
+
+on:
+  schedule:
+    - cron: "23 5 * * *"      # daily
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["cosmos/**", "README.md", ".github/workflows/**"]
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Fetch telemetry
+        run: node --version && node cosmos/fetch.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SCG_LOGIN: ${{ github.repository_owner }}
+      - name: Render & ship
+        run: |
+          git config user.name "scg-cosmos[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cp cosmos/stats.json /tmp/stats.json && cp cosmos/avatars.json /tmp/avatars.json
+          for attempt in 1 2 3 4 5; do
+            node cosmos/build.mjs
+            git add -A cosmos README.md
+            if git diff --cached --quiet; then echo "nothing changed"; exit 0; fi
+            git commit -q -m "🛰️ telemetry sync $(date -u +%F)"
+            if git push -q origin HEAD:main; then exit 0; fi
+            echo "push raced, retrying ($attempt)"; sleep $((RANDOM % 8 + 3))
+            git fetch -q origin main && git reset -q --hard origin/main
+            cp /tmp/stats.json cosmos/stats.json
+            node -e "const f=require('fs');const a=JSON.parse(f.readFileSync('cosmos/avatars.json'));a.owner=JSON.parse(f.readFileSync('/tmp/avatars.json')).owner;f.writeFileSync('cosmos/avatars.json',JSON.stringify(a))"
+          done
+          exit 1

@@ -1,0 +1,48 @@
+# Guestbook: anyone who opens a "📡 signal" issue becomes a star in the profile's sky.
+name: cosmos · incoming signal
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  plant:
+    if: contains(github.event.issue.title, 'signal') && github.event.issue.user.type == 'User'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Plant the star, render, ship
+        id: plant
+        env:
+          SIGNAL_LOGIN: ${{ github.event.issue.user.login }}
+          SIGNAL_ID: ${{ github.event.issue.user.id }}
+          SIGNAL_TITLE: ${{ github.event.issue.title }}
+        run: |
+          git config user.name "scg-cosmos[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3 4 5 6; do
+            node cosmos/signal.mjs
+            if grep -q '^result=skip' "$GITHUB_OUTPUT"; then exit 0; fi
+            node cosmos/build.mjs
+            git add -A cosmos README.md
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -q -m "📡 signal from @${SIGNAL_LOGIN}"
+            if git push -q origin HEAD:main; then exit 0; fi
+            echo "push raced, retrying ($attempt)"; sleep $((RANDOM % 8 + 3))
+            git fetch -q origin main && git reset -q --hard origin/main
+          done
+          exit 1
+      - name: Reply & close
+        if: steps.plant.outputs.result != 'skip'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          NUM: ${{ github.event.issue.number }}
+          MSG: ${{ steps.plant.outputs.message }}
+        run: |
+          gh issue comment "$NUM" --body "$MSG"
+          gh issue close "$NUM" --reason completed
