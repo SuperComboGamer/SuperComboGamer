@@ -12811,72 +12811,72 @@ endloop
 endfacet
 facet normal 0 0 1
 outer loop
-vertex -430 -307 57
-vertex -419 -315 57
-vertex -411 -304 57
+vertex -430 -307 60
+vertex -419 -315 60
+vertex -411 -304 60
 endloop
 endfacet
 facet normal 0 0 1
 outer loop
-vertex -430 -307 57
-vertex -411 -304 57
-vertex -422 -296 57
+vertex -430 -307 60
+vertex -411 -304 60
+vertex -422 -296 60
 endloop
 endfacet
 facet normal -0.59 -0.81 0
 outer loop
 vertex -430 -307 0
 vertex -419 -315 0
-vertex -419 -315 57
+vertex -419 -315 60
 endloop
 endfacet
 facet normal -0.59 -0.81 0
 outer loop
 vertex -430 -307 0
-vertex -419 -315 57
-vertex -430 -307 57
+vertex -419 -315 60
+vertex -430 -307 60
 endloop
 endfacet
 facet normal 0.81 -0.59 0
 outer loop
 vertex -419 -315 0
 vertex -411 -304 0
-vertex -411 -304 57
+vertex -411 -304 60
 endloop
 endfacet
 facet normal 0.81 -0.59 0
 outer loop
 vertex -419 -315 0
-vertex -411 -304 57
-vertex -419 -315 57
+vertex -411 -304 60
+vertex -419 -315 60
 endloop
 endfacet
 facet normal 0.59 0.81 0
 outer loop
 vertex -411 -304 0
 vertex -422 -296 0
-vertex -422 -296 57
+vertex -422 -296 60
 endloop
 endfacet
 facet normal 0.59 0.81 0
 outer loop
 vertex -411 -304 0
-vertex -422 -296 57
-vertex -411 -304 57
+vertex -422 -296 60
+vertex -411 -304 60
 endloop
 endfacet
 facet normal -0.81 0.59 0
 outer loop
 vertex -422 -296 0
 vertex -430 -307 0
-vertex -430 -307 57
+vertex -430 -307 60
 endloop
 endfacet
 facet normal -0.81 0.59 0
 outer loop
 vertex -422 -296 0
-vertex -430 -307 57
-vertex -422 -296 57
+vertex -430 -307 60
+vertex -422 -296 60
 endloop
 endfacet
 endsolid scg-commit-galaxy
