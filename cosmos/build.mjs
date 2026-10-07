@@ -12,7 +12,6 @@ import { missionPatch, sceneF1, scenePulse, sceneNight, sceneControl } from './a
 import { fmtInt } from './kit.mjs';
 import { signals, signalButton } from './art-signals.mjs';
 import { header, combo, footer } from './art-misc.mjs';
-import { galaxySTL } from './stl.mjs';
 import { starchart } from './art-starchart.mjs';
 
 const DIR = dirname(fileURLToPath(import.meta.url));
@@ -93,34 +92,21 @@ for (const [name, fn] of Object.entries(jobs)) {
 }
 
 // legacy outputs from earlier versions of the engine
-for (const old of ['skyline.stl']) if (existsSync(join(DIR, old))) rmSync(join(DIR, old));
+for (const old of ['skyline.stl', 'galaxy.stl', 'stl.mjs']) if (existsSync(join(DIR, old))) rmSync(join(DIR, old));
 
 // ---- README live sections ----
 if (!only || only === 'readme') {
-  const stl = galaxySTL(d.cal);
-  writeFileSync(join(DIR, 'galaxy.stl'), stl + '\n');
   const readmePath = join(DIR, '..', 'README.md');
   let md = readFileSync(readmePath, 'utf8');
   const put = (key, content) => {
     const re = new RegExp(`(<!-- ${key}:START -->)[\\s\\S]*?(<!-- ${key}:END -->)`);
     md = md.replace(re, (_, a, b) => `${a}\n${content}\n${b}`);
   };
-  put('HOLOGRAM', [
-    '<details>',
-    `<summary><b>🛰️ HOLOGRAM</b> — grab it, spin it: the commit galaxy in 3D (${fmtInt(d.rolling)} contributions)</summary>`,
-    '',
-    '```stl',
-    stl,
-    '```',
-    '',
-    '<sub>one tower per active day, on the same spiral arms as the galaxy above · height = contributions · drag to orbit · <a href="cosmos/galaxy.stl">open full screen</a></sub>',
-    '</details>',
-  ].join('\n'));
   const latest = sigList.slice(-12).reverse();
   put('SIGNALS', latest.length
     ? `<sub>📡 latest signals: ${latest.map((x) => `<a href="https://github.com/${x.login}">@${x.login}</a>${x.combo ? ' ✨' : ''}`).join(' · ')}</sub>`
     : '<sub>📡 no signals yet. the first star in this sky could be yours.</sub>');
   put('SYNC', `<sub>🛰️ telemetry synced <b>${d.today}</b> · this profile rebuilds itself every day from <a href="cosmos">/cosmos</a> · zero dependencies · <a href="#top">back to launch ↑</a></sub>`);
   writeFileSync(readmePath, md);
-  console.log('README.md', (Buffer.byteLength(md) / 1024).toFixed(1) + ' KB', '· galaxy.stl', (stl.length / 1024).toFixed(1) + ' KB');
+  console.log('README.md', (Buffer.byteLength(md) / 1024).toFixed(1) + ' KB');
 }
