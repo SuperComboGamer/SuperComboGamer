@@ -1,4 +1,4 @@
-// art-starchart.mjs — the classic contribution calendar, reimagined as a star chart:
+// art-starchart.mjs: the classic contribution calendar, reimagined as a star chart:
 // 53 weeks × 7 days of stars, streaks linked like constellations, a scanner sweeping the year.
 import { Doc, rng, keyframes, r1, r2, fmtInt } from './kit.mjs';
 import { MONTHS, short } from './derive.mjs';

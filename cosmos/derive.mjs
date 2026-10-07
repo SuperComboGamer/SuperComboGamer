@@ -1,4 +1,4 @@
-// derive.mjs — turns raw stats.json into the numbers the art needs.
+// derive.mjs: turns raw stats.json into the numbers the art needs.
 const DAY = 86400000;
 const iso = (t) => new Date(t).toISOString().slice(0, 10);
 const parse = (d) => Date.parse(d + 'T00:00:00Z');
@@ -56,5 +56,5 @@ export function derive(stats) {
 
 export const WEEKDAYS = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
 export const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-export const nice = (d) => { if (!d) return '—'; const [y, m, dd] = d.split('-'); return `${MONTHS[+m - 1]} ${+dd}, ${y}`; };
-export const short = (d) => { if (!d) return '—'; const [, m, dd] = d.split('-'); return `${MONTHS[+m - 1]} ${+dd}`; };
+export const nice = (d) => { if (!d) return 'n/a'; const [y, m, dd] = d.split('-'); return `${MONTHS[+m - 1]} ${+dd}, ${y}`; };
+export const short = (d) => { if (!d) return 'n/a'; const [, m, dd] = d.split('-'); return `${MONTHS[+m - 1]} ${+dd}`; };

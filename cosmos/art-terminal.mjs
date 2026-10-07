@@ -1,53 +1,38 @@
-// art-terminal.mjs — "incoming transmission": a terminal that types out who SCG is (data-driven numbers).
+// art-terminal.mjs: "incoming transmission", a terminal that types out a script with live numbers in it.
 import { Doc, keyframes, r1, r2, fmtInt } from './kit.mjs';
 
-const C = { bg: '#0a0920', ink: '#eaf6ff', out: '#b7c3e6', dim: '#6f7ca3', cyan: '#7df9ff', magenta: '#ff3dbb', gold: '#ffd36e', green: '#5dffb0', violet: '#b18cff' };
+export const CYAN = { bg: '#060a18', bar: '#0b1430', ink: '#eaf6ff', out: '#b7c9e6', dim: '#6f84a8', cyan: '#50BEFF', accent: '#8FE3FF', gold: '#FFC163', green: '#5DFFB0', violet: '#8F7BFF' };
 
-// lines: { prompt?: bool, cmd?: string, out?: [[text,color,bold]] }
-export function terminal({ fonts, d, missions }) {
+// script lines: { cmd: string } or { out: [[text, color, bold]], last?: bool }
+// prompt: { user: 'aipulse@signal', path: ':~$' }
+export function terminal({ fonts, script, prompt, header = 'INCOMING TRANSMISSION', channel = 'CH 01', footer = '', title = 'Incoming transmission', C = CYAN }) {
   const W = 1200;
   const size = 18.5, lh = 30, x0 = 58, top = 112;
-  const f1 = missions['aipulsedaily/f1-round2']?.commits;
-  const g = d.growth ? (d.growth >= 10 ? Math.round(d.growth) : d.growth.toFixed(1)) : null;
-  const script = [
-    { cmd: 'whoami' },
-    { out: [['SuperComboGamer', C.ink, 1], [` — SCG for short. orbiting GitHub since ${d.since}.`, C.out]] },
-    { cmd: 'cat role.txt' },
-    { out: [['everything.', C.magenta, 1], ['  game dev · rust · python · typescript · 3D · AI agents', C.out]] },
-    { cmd: 'ls ~/missions' },
-    { out: [['f1-round2/', C.cyan, 1], ['   ', C.out], ['pulse/', C.green, 1], ['   ', C.out], ['survive-the-night-fps/', '#ff6b6b', 1], ['   ', C.out], ['mission-control/', C.violet, 1]] },
-    { cmd: 'scg --telemetry' },
-    { out: [['▸ ', C.gold], [fmtInt(d.rolling), C.gold, 1], [' contributions in the last 365 days', C.out], g ? [` (${g}× last year)`, C.dim] : ['', C.dim]] },
-    f1 ? { out: [['▸ ', C.gold], [fmtInt(f1), C.gold, 1], [' commits into a 4K film rendered from pure code', C.out]] } : null,
-    { out: [['▸ ', C.gold], [fmtInt(d.week), C.gold, 1], [' contributions in the last 7 days. ', C.out], ['still accelerating.', C.ink, 1]] },
-    { cmd: 'echo $NEXT_MISSION' },
-    { out: [['whatever you think is impossible.', C.cyan, 1]], last: true },
-  ].filter(Boolean);
+  script = script.filter(Boolean);
   const H = top + script.length * lh + 58;
-  const doc = new Doc({ width: W, height: H, fonts, title: 'Incoming transmission from SCG', desc: script.map((l) => l.cmd ? '$ ' + l.cmd : l.out.map((s) => s[0]).join('')).join('\n') });
+  const doc = new Doc({ width: W, height: H, fonts, title, desc: script.map((l) => l.cmd ? '$ ' + l.cmd : l.out.map((s) => s[0]).join('')).join('\n') });
   const cw = doc.measure('M', { font: 'mono', size });
   const css = [];
   const P = [];
   doc.def('frame', `<clipPath id="frame"><rect width="${W}" height="${H}" rx="22"/></clipPath>`);
-  doc.def('gTermBg', `<linearGradient id="gTermBg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d0b27"/><stop offset="1" stop-color="#07061a"/></linearGradient>`);
   P.push(`<rect width="${W}" height="${H}" fill="${C.bg}"/>`);
   // header bar
-  P.push(`<rect width="${W}" height="62" fill="#120f33"/><path d="M0 62H${W}" stroke="${C.cyan}" stroke-opacity=".25"/>`);
+  P.push(`<rect width="${W}" height="62" fill="${C.bar}"/><path d="M0 62H${W}" stroke="${C.cyan}" stroke-opacity=".25"/>`);
   ['#ff5f7e', '#ffd36e', '#5dffb0'].forEach((c, i) => P.push(`<circle cx="${34 + i * 22}" cy="31" r="6.5" fill="${c}" opacity=".9"/>`));
-  P.push(doc.text('INCOMING TRANSMISSION', { font: 'hud', size: 13, x: W / 2, y: 36, anchor: 'middle', fill: C.cyan, tracking: 0.38 }));
-  P.push(doc.text('ENCRYPTION: NONE · CH 01', { font: 'mono', size: 11.5, x: W - 34, y: 35.5, anchor: 'end', fill: C.dim, tracking: 0.06 }));
-  P.push(`<circle cx="${W / 2 - 150}" cy="31" r="4" fill="#ff3b5c" class="rec"/>`);
+  P.push(doc.text(header, { font: 'hud', size: 13, x: W / 2, y: 36, anchor: 'middle', fill: C.cyan, tracking: 0.38 }));
+  P.push(doc.text(channel, { font: 'mono', size: 11.5, x: W - 34, y: 35.5, anchor: 'end', fill: C.dim, tracking: 0.06 }));
+  P.push(`<circle cx="${r1(W / 2 - doc.measure(header, { font: 'hud', size: 13, tracking: 0.38 }) / 2 - 22)}" cy="31" r="4" fill="#ff3b5c" class="rec"/>`);
   css.push(`.rec{animation:rec 1.4s steps(1) infinite}`, keyframes('rec', [[0, 'opacity:1'], [50, 'opacity:.15']]));
 
   // timeline
   const typeDt = 0.05, cmdPause = 0.4, outPause = 0.24, hold = 16, lead = 0.5;
   let t = lead; const ev = []; // per line: {kind, t0, t1, n, y, x}
-  const prompt = 'scg@deep-space:~$ ';
+  const promptStr = prompt.user + prompt.path + ' ';
   script.forEach((l, i) => {
     const y = top + i * lh;
     if (l.cmd) {
       const t0 = t + cmdPause, n = l.cmd.length;
-      ev.push({ kind: 'cmd', t0, t1: t0 + n * typeDt, n, y, x: x0 + prompt.length * cw, prompt: t });
+      ev.push({ kind: 'cmd', t0, t1: t0 + n * typeDt, n, y, x: x0 + promptStr.length * cw, prompt: t });
       t = t0 + n * typeDt + 0.25;
     } else {
       ev.push({ kind: 'out', t0: t + outPause, y });
@@ -63,8 +48,8 @@ export function terminal({ fonts, d, missions }) {
     const id = `ln${i}`;
     if (l.cmd) {
       // prompt appears when previous line done
-      P.push(`<g class="${id}p">` + doc.text('scg@deep-space', { font: 'monob', size, x: x0, y, fill: C.cyan })
-        + doc.text(':~$', { font: 'monob', size, x: x0 + 14 * cw, y, fill: C.magenta }) + `</g>`);
+      P.push(`<g class="${id}p">` + doc.text(prompt.user, { font: 'monob', size, x: x0, y, fill: C.cyan })
+        + doc.text(prompt.path, { font: 'monob', size, x: x0 + prompt.user.length * cw, y, fill: C.accent }) + `</g>`);
       css.push(`.${id}p{animation:${id}p ${r2(T)}s steps(1) infinite;opacity:0}` + keyframes(`${id}p`, [[0, 'opacity:0'], [pc(e.prompt), 'opacity:1'], [99.6, 'opacity:0']]));
       P.push(doc.text(l.cmd, { font: 'mono', size, x: e.x, y, fill: C.ink }));
       // cover slides right in steps
@@ -121,7 +106,7 @@ export function terminal({ fonts, d, missions }) {
   doc.def('gEdge', `<radialGradient id="gEdge" cx=".5" cy=".5" r=".7"><stop offset=".7" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".5"/></radialGradient>`);
   P.push(`<rect y="62" width="${W}" height="${H - 62}" fill="url(#pScan)" opacity=".55"/>`);
   P.push(`<rect width="${W}" height="${H}" fill="url(#gEdge)"/>`);
-  P.push(doc.text(`CH-01 · SIGNAL CLEAN · ${d.today}`, { font: 'mono', size: 11, x: W - 34, y: H - 24, anchor: 'end', fill: C.dim, tracking: 0.08 }));
+  if (footer) P.push(doc.text(footer, { font: 'mono', size: 11, x: W - 34, y: H - 24, anchor: 'end', fill: C.dim, tracking: 0.08 }));
   P.push(`<rect x=".75" y=".75" width="${W - 1.5}" height="${H - 1.5}" rx="21.5" fill="none" stroke="${C.cyan}" stroke-opacity=".25" stroke-width="1.5"/>`);
   // reduced motion: everything visible, covers gone
   css.push(`@media (prefers-reduced-motion: reduce){*{animation:none!important}[class^="ln"]{opacity:1!important}rect[class$="c"]{display:none}}`);

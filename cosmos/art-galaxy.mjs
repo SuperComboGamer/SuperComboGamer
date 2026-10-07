@@ -1,4 +1,4 @@
-// art-galaxy.mjs — the last 365 days as a rotating spiral galaxy. One star = one day. + live HUD stats.
+// art-galaxy.mjs: the last 365 days as a rotating spiral galaxy. One star = one day. + live HUD stats.
 import { Doc, rng, keyframes, r1, r2, fmtInt, b64 } from './kit.mjs';
 import { WEEKDAYS, short, nice } from './derive.mjs';
 
@@ -129,7 +129,7 @@ export function galaxy({ fonts, bg, spiral, d }) {
   // tiles
   const tiles = [
     ['CURRENT STREAK', `${d.streak.len} ${d.streak.len === 1 ? 'DAY' : 'DAYS'}`, d.streak.len ? `since ${short(d.streak.from)}` : 'reigniting…', C.gold],
-    ['LONGEST STREAK', `${d.longest.len} DAYS`, d.longest.from ? `${short(d.longest.from)} → ${short(d.longest.to)}` : '—', C.cyan],
+    ['LONGEST STREAK', `${d.longest.len} DAYS`, d.longest.from ? `${short(d.longest.from)} → ${short(d.longest.to)}` : 'n/a', C.cyan],
     ['BEST DAY', fmtInt(d.bestDay.count), nice(d.bestDay.date), '#ff6fd8'],
     ['ACTIVE DAYS', `${d.activeDays}`, `busiest: ${WEEKDAYS[d.busiest].toLowerCase()}s`, C.violet],
   ];

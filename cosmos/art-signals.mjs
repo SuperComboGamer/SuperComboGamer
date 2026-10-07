@@ -1,10 +1,10 @@
-// art-signals.mjs — the guestbook: every visitor who transmits a signal becomes a star in SCG's sky.
+// art-signals.mjs: the guestbook. Every visitor who transmits a signal becomes a star around the aipulsedaily brain.
 import { Doc, rng, hash, keyframes, r1, r2, fmtInt, b64, esc } from './kit.mjs';
 import { short } from './derive.mjs';
 
-const C = { ink: '#eaf6ff', dim: '#8fa3c7', faint: '#5d6b8f', cyan: '#7df9ff', magenta: '#ff3dbb', gold: '#ffd36e' };
+const C = { ink: '#eaf6ff', dim: '#8fa8c9', faint: '#5a6f91', cyan: '#50BEFF', magenta: '#8F7BFF', gold: '#FFC163' };
 
-export function signals({ fonts, bg, list, avatars, owner }) {
+export function signals({ fonts, bg, list, avatars, logo }) {
   const W = 1200, H = 620;
   const n = list.length;
   const doc = new Doc({ width: W, height: H, fonts, title: `${n} signals received`, desc: n ? `Latest: ${list.slice(-8).reverse().map((s) => '@' + s.login).join(', ')}` : 'No signals yet' });
@@ -43,8 +43,8 @@ export function signals({ fonts, bg, list, avatars, owner }) {
   P.push(`<ellipse cx="${ox}" cy="${oy}" rx="${AX}" ry="${AY}" fill="none" stroke="${C.cyan}" stroke-opacity=".12" stroke-dasharray="2 8"/>`);
   P.push(`<ellipse cx="${ox}" cy="${oy}" rx="${AX * 0.55}" ry="${AY * 0.55}" fill="none" stroke="${C.cyan}" stroke-opacity=".08" stroke-dasharray="2 8"/>`);
 
-  // origin star: SCG (owner avatar if available)
-  doc.def('gOrigin', `<radialGradient id="gOrigin"><stop offset="0" stop-color="#fff"/><stop offset=".3" stop-color="${C.gold}" stop-opacity=".7"/><stop offset="1" stop-color="${C.magenta}" stop-opacity="0"/></radialGradient>`);
+  // origin: the aipulsedaily brain
+  doc.def('gOrigin', `<radialGradient id="gOrigin"><stop offset="0" stop-color="#fff"/><stop offset=".3" stop-color="${C.cyan}" stop-opacity=".7"/><stop offset="1" stop-color="${C.magenta}" stop-opacity="0"/></radialGradient>`);
   P.push(`<circle cx="${ox}" cy="${oy}" r="70" fill="url(#gOrigin)" opacity=".55" class="opulse"/>`);
   css.push(`.opulse{animation:opulse 3.2s ease-in-out infinite alternate;transform-origin:${ox}px ${oy}px}`, keyframes('opulse', [[0, 'transform:scale(.9);opacity:.45'], [100, 'transform:scale(1.08);opacity:.7']]));
   // radar waves from origin (waiting for signals)
@@ -56,9 +56,9 @@ export function signals({ fonts, bg, list, avatars, owner }) {
       + `<image href="${dataUri}" x="${r1(x - r)}" y="${r1(y - r)}" width="${r * 2}" height="${r * 2}" clip-path="url(#cl${id})"/>`
       + `<circle cx="${r1(x)}" cy="${r1(y)}" r="${r}" fill="none" stroke="${ring}" stroke-width="2"/>`;
   };
-  if (owner && owner.avatar) P.push(avatarCircle(ox, oy, 24, owner.avatar, C.gold, 'own'));
+  if (logo) P.push(avatarCircle(ox, oy, 26, `data:image/jpeg;base64,${b64(logo)}`, C.cyan, 'own'));
   else P.push(`<circle cx="${ox}" cy="${oy}" r="9" fill="#fff"/>`);
-  P.push(doc.text('SCG', { font: 'heavy', size: 13, x: ox, y: oy + 46, anchor: 'middle', fill: C.gold, tracking: 0.3 }));
+  P.push(doc.text('aipulsedaily', { font: 'bodyb', size: 14, x: ox, y: oy + 50, anchor: 'middle', fill: C.ink }));
 
   // visitor stars
   const showAvatars = 28, showLabels = 12;
@@ -93,13 +93,13 @@ export function signals({ fonts, bg, list, avatars, owner }) {
   const X0 = 800;
   P.push(`<path d="M${X0 - 26} 60V${H - 60}" stroke="${C.cyan}" stroke-opacity=".14"/>`);
   P.push(doc.text('SIGNALS RECEIVED', { font: 'hud', size: 14, x: X0, y: 84, fill: C.cyan, tracking: 0.3 }));
-  doc.def('gNum', `<linearGradient id="gNum" x1="${X0}" x2="${X0 + 240}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="${C.cyan}"/><stop offset="1" stop-color="#9b7bff"/></linearGradient>`);
+  doc.def('gNum', `<linearGradient id="gNum" x1="${X0}" x2="${X0 + 240}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="${C.cyan}"/><stop offset="1" stop-color="#8F7BFF"/></linearGradient>`);
   P.push(`<path d="${doc.textD(n < 10 ? '0' + n : fmtInt(n), { font: 'heavy', size: 76, x: X0 - 3, y: 172 })}" fill="url(#gNum)"/>`);
   P.push(doc.text(n === 1 ? 'TRAVELER HAS PASSED THROUGH' : 'TRAVELERS HAVE PASSED THROUGH', { font: 'mono', size: 11.5, x: X0, y: 198, fill: C.dim, tracking: 0.1 }));
   // latest list
   P.push(doc.text('LATEST TRANSMISSIONS', { font: 'hud', size: 10.5, x: X0, y: 246, fill: C.dim, tracking: 0.2 }));
   const latest = list.slice(-6).reverse();
-  if (!latest.length) P.push(doc.text('— none yet —', { font: 'mono', size: 13, x: X0, y: 276, fill: C.faint }));
+  if (!latest.length) P.push(doc.text('none yet. the first one could be you.', { font: 'mono', size: 13, x: X0, y: 276, fill: C.faint }));
   latest.forEach((s, i) => {
     const y = 278 + i * 30;
     const col = s.combo ? C.gold : C.ink;

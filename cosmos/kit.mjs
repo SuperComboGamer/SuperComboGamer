@@ -1,4 +1,4 @@
-// kit.mjs — tiny SVG toolkit: text-as-paths, defs registry, prng, helpers. Zero dependencies.
+// kit.mjs: tiny SVG toolkit: text-as-paths, defs registry, prng, helpers. Zero dependencies.
 import { readFileSync } from 'node:fs';
 
 export function loadFonts(path) {
@@ -30,6 +30,7 @@ export function hash(str) {
 export const r1 = (v) => Math.round(v * 10) / 10;
 export const r2 = (v) => Math.round(v * 100) / 100;
 export const r3 = (v) => Math.round(v * 1000) / 1000;
+export const r6 = (v) => Math.round(v * 1e6) / 1e6; // glyph scales need this much precision or long runs drift
 export const fmtInt = (n) => Math.round(n).toLocaleString('en-US');
 export const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -98,13 +99,13 @@ export class Doc {
       }
       pen += adv + tracking * f.upm + (i < chars.length - 1 ? kern(f, ch, chars[i + 1]) : 0);
     });
-    const a = [`transform="translate(${r2(x0)} ${r2(y)}) scale(${r3(s)} ${r3(-s)})"`];
+    const a = [`transform="translate(${r2(x0)} ${r2(y)}) scale(${r6(s)} ${r6(-s)})"`];
     if (fill) a.push(`fill="${fill}"`);
     if (cls) a.push(`class="${cls}"`);
     if (attrs) a.push(attrs);
     return `<g ${a.join(' ')}>${uses.join('')}</g>`;
   }
-  // text as ONE combined path (absolute canvas coords) — for clipping / continuous gradients
+  // text as ONE combined path (absolute canvas coords), for clipping / continuous gradients
   textD(str, { font, size, x = 0, y = 0, anchor = 'start', tracking = 0, prec = 1 }) {
     const f = this.font(font); const s = size / f.upm;
     const width = this.measure(str, { font, size, tracking });
@@ -187,11 +188,11 @@ export function arcText(doc, str, { font, size, r, tracking = 0, side = 'top', f
     const id = doc.glyph(font, g);
     if (side === 'top') {
       const a = (mid / r) * 180 / Math.PI; // degrees from 12 o'clock, clockwise
-      out.push(`<use href="#${id}" transform="translate(${cx} ${cy}) rotate(${r2(a)}) translate(${r2(-adv / 2)} ${-r}) scale(${r3(s)} ${r3(-s)})"/>`);
+      out.push(`<use href="#${id}" transform="translate(${cx} ${cy}) rotate(${r2(a)}) translate(${r2(-adv / 2)} ${-r}) scale(${r6(s)} ${r6(-s)})"/>`);
     } else {
       const a = -(mid / r) * 180 / Math.PI; // from 6 o'clock, counter-clockwise for left→right reading
       const capH = (f.cap || f.upm * 0.7) * s;
-      out.push(`<use href="#${id}" transform="translate(${cx} ${cy}) rotate(${r2(a)}) translate(${r2(-adv / 2)} ${r2(r + capH)}) scale(${r3(s)} ${r3(-s)})"/>`);
+      out.push(`<use href="#${id}" transform="translate(${cx} ${cy}) rotate(${r2(a)}) translate(${r2(-adv / 2)} ${r2(r + capH)}) scale(${r6(s)} ${r6(-s)})"/>`);
     }
   });
   return `<g${fill ? ` fill="${fill}"` : ''} ${attrs}>${out.join('')}</g>`;

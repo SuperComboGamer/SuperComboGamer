@@ -1,14 +1,17 @@
-// signal.mjs — a visitor opened a "📡 signal" issue: plant them as a star (+ cache their avatar).
+// signal.mjs: a visitor opened an issue on the profile repo.
+//   "📡 signal"     plant them as a star in the guestbook sky (+ cache their avatar)
+//   "vote: <model>" count their vote for the next NYC skyline test (one current vote per account)
 // Inputs come from the issue event via env vars (never interpolated into shell).
-import { readFileSync, writeFileSync, appendFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, appendFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { pollOptions, tally } from './poll.mjs';
 
 const DIR = dirname(fileURLToPath(import.meta.url));
 const KEEP_AVATARS = 28;
 
 export async function plant({ login, id, title, now = new Date(), fetchImpl = fetch, sigPath = join(DIR, 'signals.json'), avPath = join(DIR, 'avatars.json') }) {
-  if (!/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/.test(login || '') || !/^\d+$/.test(String(id || ''))) return { result: 'skip', message: 'invalid sender' };
+  if (!LOGIN_RE.test(login || '') || !/^\d+$/.test(String(id || ''))) return { result: 'skip', message: 'invalid sender' };
   if (!/signal/i.test(title || '')) return { result: 'skip', message: 'not a signal' };
   const combo = /supernova/i.test(title);
   const list = JSON.parse(readFileSync(sigPath, 'utf8'));
@@ -36,8 +39,36 @@ export async function plant({ login, id, title, now = new Date(), fetchImpl = fe
   return { result, number, message };
 }
 
+const LOGIN_RE = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
+export function castVote({ login, id, title, now = new Date(), votesPath = join(DIR, 'votes.json'), statsPath = join(DIR, 'stats.json'), apPath = join(DIR, 'aipulse.json') }) {
+  if (!LOGIN_RE.test(login || '') || !/^\d+$/.test(String(id || ''))) return { result: 'skip', message: 'invalid sender' };
+  const m = /^\s*vote:\s*([A-Za-z0-9._~\/-]{1,120})\s*$/i.exec(title || '');
+  if (!m) return { result: 'skip', message: 'not a vote' };
+  const model = m[1];
+  const stats = JSON.parse(readFileSync(statsPath, 'utf8'));
+  const AP = JSON.parse(readFileSync(apPath, 'utf8'));
+  const options = stats.drops ? pollOptions({ drops: stats.drops, poll: AP.poll, tested: AP.nyc.chips }) : [];
+  const opt = options.find((o) => o.id === model);
+  if (!opt) return { result: 'stale', message: `🗳️ Thanks @${login}! \`${model}\` is not on the ballot right now. The ballot always follows the newest models, so it may have just rotated out. Pick one from the live ballot on the profile and vote again.` };
+  const votes = existsSync(votesPath) ? JSON.parse(readFileSync(votesPath, 'utf8')) : {};
+  const prev = votes[String(id)];
+  votes[String(id)] = { login, model, at: now.toISOString() };
+  writeFileSync(votesPath, JSON.stringify(votes, null, 1));
+  const n = tally(votes, options)[model];
+  const was = prev && prev.model !== model ? (options.find((o) => o.id === prev.model)?.model || prev.model) : null;
+  const result = !prev ? 'vote' : prev.model === model ? 'again' : 'switch';
+  const tail = `It has ${n} ${n === 1 ? 'vote' : 'votes'} now, and the live tally on the profile updates in about a minute.`;
+  const message = result === 'again'
+    ? `🗳️ Already counted, @${login}: your vote is on **${opt.model}**. ${tail}`
+    : result === 'switch'
+      ? `🗳️ Vote moved, @${login}: from ${was} to **${opt.model}** for the next NYC skyline test. ${tail}`
+      : `🗳️ Vote counted, @${login}! You picked **${opt.model}** for the next NYC skyline test. ${tail} Changed your mind later? Vote again and your vote moves.`;
+  return { result, model, count: n, message };
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const out = await plant({ login: process.env.SIGNAL_LOGIN, id: process.env.SIGNAL_ID, title: process.env.SIGNAL_TITLE });
+  const input = { login: process.env.SIGNAL_LOGIN, id: process.env.SIGNAL_ID, title: process.env.SIGNAL_TITLE };
+  const out = /^\s*vote:/i.test(input.title || '') ? castVote(input) : await plant(input);
   console.log(out);
   if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `result=${out.result}\nmessage=${out.message.replace(/\n/g, ' ')}\n`);
 }

@@ -1,15 +1,15 @@
-// art-misc.mjs — section headers (dark/light), the secret ULTRA COMBO reveal, and the footer (dark/light).
+// art-misc.mjs: section headers (dark/light), the secret ULTRA COMBO reveal, and the footer (dark/light).
 import { Doc, rng, keyframes, r1, r2, b64 } from './kit.mjs';
 
 const THEMES = {
-  dark: { ink: '#eaf6ff', dim: '#8fa3c7', a: '#7df9ff', b: '#ff3dbb', c: '#9b7bff', line: '#7df9ff' },
-  light: { ink: '#140f2e', dim: '#56607a', a: '#0e7490', b: '#c0267f', c: '#6d28d9', line: '#6d28d9' },
+  dark: { ink: '#eaf6ff', dim: '#8fa8c9', a: '#50BEFF', b: '#8F7BFF', line: '#50BEFF' },
+  light: { ink: '#0A0E1C', dim: '#4a5878', a: '#0b6fb8', b: '#5b45d6', line: '#0b6fb8' },
 };
 
 export function header({ fonts, num, title, sub, theme = 'dark', total = 7 }) {
   const T = THEMES[theme];
   const W = 1200, H = 116;
-  const doc = new Doc({ width: W, height: H, fonts, title: `${num} — ${title}` });
+  const doc = new Doc({ width: W, height: H, fonts, title: `${num}: ${title}` });
   const css = [];
   const P = [];
   doc.def('gNumS', `<linearGradient id="gNumS" x1="0" x2="1"><stop offset="0" stop-color="${T.a}"/><stop offset="1" stop-color="${T.b}"/></linearGradient>`);
@@ -36,7 +36,7 @@ export function header({ fonts, num, title, sub, theme = 'dark', total = 7 }) {
 
 export function combo({ fonts }) {
   const W = 1200, H = 460, cx = 600, cy = 205;
-  const doc = new Doc({ width: W, height: H, fonts, title: 'ULTRA COMBO — secret unlocked' });
+  const doc = new Doc({ width: W, height: H, fonts, title: 'ULTRA COMBO: secret unlocked' });
   const R = rng('combo');
   const css = [];
   const P = [];
@@ -83,7 +83,7 @@ export function combo({ fonts }) {
   return doc.render(`<g clip-path="url(#frame)">${P.join('')}</g>`);
 }
 
-export function footer({ fonts, bg, theme = 'dark', d }) {
+export function footer({ fonts, bg, theme = 'dark', synced = '' }) {
   const W = 1200, H = 420, cx = 600, cy = 196;
   const dark = theme === 'dark';
   const doc = new Doc({ width: W, height: H, fonts, title: dark ? 'End of transmission' : 'Light mode detected' });
@@ -94,25 +94,25 @@ export function footer({ fonts, bg, theme = 'dark', d }) {
   if (dark) {
     P.push(`<rect width="${W}" height="${H}" fill="#03020a"/><image href="data:image/jpeg;base64,${b64(bg)}" width="${W}" height="${H}" preserveAspectRatio="none"/>`);
     // black hole: back disk, lensed ring, horizon, front disk
-    doc.def('gDisk', `<linearGradient id="gDisk" x1="${cx - 260}" x2="${cx + 260}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ff3dbb" stop-opacity="0"/><stop offset=".25" stop-color="#ffb066"/><stop offset=".45" stop-color="#fff3d6"/><stop offset=".6" stop-color="#ffcf8a"/><stop offset=".85" stop-color="#ff3dbb" stop-opacity=".6"/><stop offset="1" stop-color="#7b2cff" stop-opacity="0"/></linearGradient>`);
-    doc.def('gLens', `<linearGradient id="gLens" x1="0" y1="${cy - 95}" x2="0" y2="${cy + 95}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff3d6"/><stop offset=".45" stop-color="#ffb066" stop-opacity=".7"/><stop offset=".55" stop-color="#ffb066" stop-opacity=".5"/><stop offset="1" stop-color="#ff7a2f" stop-opacity=".85"/></linearGradient>`);
+    doc.def('gDisk', `<linearGradient id="gDisk" x1="${cx - 260}" x2="${cx + 260}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#8F7BFF" stop-opacity="0"/><stop offset=".25" stop-color="#50BEFF"/><stop offset=".45" stop-color="#f2fbff"/><stop offset=".6" stop-color="#8FE3FF"/><stop offset=".85" stop-color="#8F7BFF" stop-opacity=".6"/><stop offset="1" stop-color="#5b45d6" stop-opacity="0"/></linearGradient>`);
+    doc.def('gLens', `<linearGradient id="gLens" x1="0" y1="${cy - 95}" x2="0" y2="${cy + 95}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f2fbff"/><stop offset=".45" stop-color="#50BEFF" stop-opacity=".7"/><stop offset=".55" stop-color="#50BEFF" stop-opacity=".5"/><stop offset="1" stop-color="#8F7BFF" stop-opacity=".85"/></linearGradient>`);
     doc.def('fBH', `<filter id="fBH" x="-30%" y="-80%" width="160%" height="260%"><feGaussianBlur stdDeviation="7"/></filter>`);
     doc.def('fBH2', `<filter id="fBH2" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3"/></filter>`);
-    doc.def('gHaloBH', `<radialGradient id="gHaloBH"><stop offset=".25" stop-color="#ffb066" stop-opacity=".35"/><stop offset=".6" stop-color="#ff3dbb" stop-opacity=".12"/><stop offset="1" stop-color="#7b2cff" stop-opacity="0"/></radialGradient>`);
+    doc.def('gHaloBH', `<radialGradient id="gHaloBH"><stop offset=".25" stop-color="#50BEFF" stop-opacity=".35"/><stop offset=".6" stop-color="#8F7BFF" stop-opacity=".12"/><stop offset="1" stop-color="#5b45d6" stop-opacity="0"/></radialGradient>`);
     P.push(`<circle cx="${cx}" cy="${cy}" r="250" fill="url(#gHaloBH)"/>`);
     // back half of disk (upper arc of ellipse)
     P.push(`<path d="M${cx - 250} ${cy}A250 40 0 0 1 ${cx + 250} ${cy}" fill="none" stroke="url(#gDisk)" stroke-width="22" filter="url(#fBH)" opacity=".75"/>`);
     // lensed ring of the far side, arching over and under the hole
     P.push(`<ellipse cx="${cx}" cy="${cy}" rx="86" ry="82" fill="none" stroke="url(#gLens)" stroke-width="14" filter="url(#fBH2)" class="lens"/>`);
-    P.push(`<ellipse cx="${cx}" cy="${cy}" rx="86" ry="82" fill="none" stroke="#fff6e6" stroke-width="2.4" opacity=".9"/>`);
+    P.push(`<ellipse cx="${cx}" cy="${cy}" rx="86" ry="82" fill="none" stroke="#f2fbff" stroke-width="2.4" opacity=".9"/>`);
     css.push(`.lens{animation:lens 3s ease-in-out infinite alternate}`, keyframes('lens', [[0, 'opacity:.8'], [100, 'opacity:1']]));
     // event horizon
-    P.push(`<circle cx="${cx}" cy="${cy}" r="66" fill="#000"/><circle cx="${cx}" cy="${cy}" r="68" fill="none" stroke="#ffe7c2" stroke-width="1.6" opacity=".9"/>`);
+    P.push(`<circle cx="${cx}" cy="${cy}" r="66" fill="#000"/><circle cx="${cx}" cy="${cy}" r="68" fill="none" stroke="#bfe9ff" stroke-width="1.6" opacity=".9"/>`);
     // front half of disk with swirling dashes
     P.push(`<path d="M${cx + 250} ${cy}A250 40 0 0 1 ${cx - 250} ${cy}" fill="none" stroke="url(#gDisk)" stroke-width="26" filter="url(#fBH)"/>`);
     P.push(`<path d="M${cx + 250} ${cy}A250 40 0 0 1 ${cx - 250} ${cy}" fill="none" stroke="url(#gDisk)" stroke-width="3.2"/>`);
-    P.push(`<path d="M${cx + 235} ${cy + 3}A235 36 0 0 1 ${cx - 235} ${cy + 3}" fill="none" stroke="#fff6e6" stroke-width="2" stroke-dasharray="18 26" opacity=".55" class="swirl"/>`);
-    P.push(`<path d="M${cx + 205} ${cy + 6}A205 31 0 0 1 ${cx - 205} ${cy + 6}" fill="none" stroke="#ffd36e" stroke-width="1.6" stroke-dasharray="10 30" opacity=".5" class="swirl2"/>`);
+    P.push(`<path d="M${cx + 235} ${cy + 3}A235 36 0 0 1 ${cx - 235} ${cy + 3}" fill="none" stroke="#f2fbff" stroke-width="2" stroke-dasharray="18 26" opacity=".55" class="swirl"/>`);
+    P.push(`<path d="M${cx + 205} ${cy + 6}A205 31 0 0 1 ${cx - 205} ${cy + 6}" fill="none" stroke="#8FE3FF" stroke-width="1.6" stroke-dasharray="10 30" opacity=".5" class="swirl2"/>`);
     css.push(`.swirl{animation:swirl 2.2s linear infinite}`, keyframes('swirl', [[0, 'stroke-dashoffset:0'], [100, 'stroke-dashoffset:-88']]),
       `.swirl2{animation:swirl2 1.6s linear infinite}`, keyframes('swirl2', [[0, 'stroke-dashoffset:0'], [100, 'stroke-dashoffset:-80']]));
     // infalling stars
@@ -122,8 +122,8 @@ export function footer({ fonts, bg, theme = 'dark', d }) {
     }
     css.push(`.fall{animation:fall 6s cubic-bezier(.5,0,.9,.4) infinite}`, keyframes('fall', [[0, 'transform:translate(0,0);opacity:0'], [10, 'opacity:1'], [95, 'transform:translate(var(--fx),var(--fy));opacity:.6'], [100, 'transform:translate(var(--fx),var(--fy));opacity:0']]));
     P.push(doc.text('END OF TRANSMISSION', { font: 'hud', size: 22, x: cx, y: 340, anchor: 'middle', fill: '#eaf6ff', tracking: 0.42 }));
-    P.push(doc.text(`thanks for drifting by, traveler  ·  telemetry refreshes daily  ·  last sync ${d.today}`, { font: 'mono', size: 13, x: cx, y: 370, anchor: 'middle', fill: '#8fa3c7' }));
-    P.push(`<rect x=".75" y=".75" width="${W - 1.5}" height="${H - 1.5}" rx="21.5" fill="none" stroke="#7df9ff" stroke-opacity=".2" stroke-width="1.5"/>`);
+    P.push(doc.text(`signal over noise  ·  live data refreshed every 15 min${synced ? '  ·  last change ' + synced : ''}`, { font: 'mono', size: 13, x: cx, y: 370, anchor: 'middle', fill: '#8fa8c9' }));
+    P.push(`<rect x=".75" y=".75" width="${W - 1.5}" height="${H - 1.5}" rx="21.5" fill="none" stroke="#50BEFF" stroke-opacity=".25" stroke-width="1.5"/>`);
   } else {
     doc.def('gDay', `<linearGradient id="gDay" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffdf5"/><stop offset="1" stop-color="#ffe9f6"/></linearGradient>`);
     doc.def('gSunL', `<radialGradient id="gSunL"><stop offset="0" stop-color="#fff"/><stop offset=".25" stop-color="#fff3c4"/><stop offset=".55" stop-color="#ffcf5a" stop-opacity=".55"/><stop offset="1" stop-color="#ff9a3d" stop-opacity="0"/></radialGradient>`);
@@ -133,7 +133,6 @@ export function footer({ fonts, bg, theme = 'dark', d }) {
     P.push(`<g transform="translate(${cx} ${cy - 10})"><g class="rays">${rays.join('')}</g><circle r="190" fill="url(#gSunL)" class="sun"/><circle r="52" fill="#fff8dc"/></g>`);
     css.push(`.rays{animation:rays 40s linear infinite;transform-origin:0px 0px}`, keyframes('rays', [[0, 'transform:rotate(0deg)'], [100, 'transform:rotate(360deg)']]),
       `.sun{animation:sunp 2.5s ease-in-out infinite alternate;transform-origin:0px 0px}`, keyframes('sunp', [[0, 'transform:scale(.95)'], [100, 'transform:scale(1.06)']]));
-    // sunglasses-wearing star? no: a tiny squinting astronaut visor glint
     P.push(doc.text('LIGHT MODE DETECTED', { font: 'hud', size: 22, x: cx, y: 330, anchor: 'middle', fill: '#140f2e', tracking: 0.42 }));
     P.push(doc.text("the void can't reach you out here. flip GitHub to dark mode for the full transmission.", { font: 'mono', size: 13, x: cx, y: 362, anchor: 'middle', fill: '#56607a' }));
     P.push(`<rect x=".75" y=".75" width="${W - 1.5}" height="${H - 1.5}" rx="21.5" fill="none" stroke="#ffb84d" stroke-opacity=".5" stroke-width="1.5"/>`);

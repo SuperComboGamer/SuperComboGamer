@@ -1,0 +1,77 @@
+{
+  "x": {
+    "handle": "aipulseda1ly",
+    "name": "aipulsedaily",
+    "url": "https://x.com/aipulseda1ly",
+    "bio": "Tracking every AI model drop, benchmark leak, and lab move so you don't have to. Signal over noise.",
+    "since": "Feb 10, 2026"
+  },
+  "posts": {
+    "f1": "2089804529034481700",
+    "showroom": "2080868963039265040",
+    "deadfall": "2103352533657719230",
+    "lambo": "2105087699971395589",
+    "night": "2107555782825041931"
+  },
+  "nyc": {
+    "since": "April 2026",
+    "labs": [
+      "Claude",
+      "GPT",
+      "Gemini",
+      "Grok",
+      "DeepSeek",
+      "GLM",
+      "Kimi",
+      "Qwen",
+      "Meta",
+      "Mistral"
+    ],
+    "best": [
+      {
+        "id": "2064434795094966656",
+        "title": "Fable 5 Max on the NYC skyline"
+      },
+      {
+        "id": "2060075792957124861",
+        "title": "Opus 4.8 vs GPT-5.5 Pro"
+      },
+      {
+        "id": "2080771726254743571",
+        "title": "Opus 5 just broke my NYC test"
+      }
+    ],
+    "chips": [
+      "Fable 5 Max",
+      "Claude Opus 5",
+      "Opus 4.8",
+      "GPT-5.5 Pro",
+      "Fable 5.1",
+      "GPT-6.1 Sol",
+      "Sonnet 5.5",
+      "Claude Opus 5.5"
+    ],
+    "brief": "a photorealistic NYC skyline at golden hour, built in three.js as one HTML file with no assets."
+  },
+  "poll": {
+    "question": "Which new model should face the NYC test next?",
+    "labs": [
+      "anthropic",
+      "openai",
+      "google",
+      "x-ai",
+      "meta-llama",
+      "mistralai",
+      "deepseek",
+      "qwen",
+      "z-ai",
+      "moonshotai",
+      "xiaomi",
+      "cohere"
+    ],
+    "size": 5
+  },
+  "repos": [
+    "webdevcody/survive-the-night-fps"
+  ]
+}
